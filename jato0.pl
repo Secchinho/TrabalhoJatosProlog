@@ -26,21 +26,67 @@
 troca(0, 1).
 troca(1, 0).
 
-% [FORWARD, REVERSE, LEFT, RIGHT, BOOM, MSG]
+distanciaEuclidiana([X, Y], [X1, Y1], D) :- Dx is X - X1, Dy is Y - Y1, D is Dx * Dx + Dy * Dy.
+
+alvoMaisProximo(_, [A|[]], A).
+alvoMaisProximo(J, [A|R], A) :- alvoMaisProximo(J, R, B), distanciaEuclidiana(J, A, D1), distanciaEuclidiana(J, B, D2),
+                                D1 =< D2.
+alvoMaisProximo(J, [A|R], B) :- alvoMaisProximo(J, R, B), distanciaEuclidiana(J, A, D1), distanciaEuclidiana(J, B, D2),
+                                D1 > D2.
+
+missilMaisProximo(_, [M|[]], M).
+missilMaisProximo(J, [M|R], M) :- missilMaisProximo(J, R, B), distanciaEuclidiana(J, M, D1), distanciaEuclidiana(J, B, D2),
+                                    D1 =< D2.
+missilMaisProximo(J, [M|R], B) :- missilMaisProximo(J, R, B), distanciaEuclidiana(J, M, D1), distanciaEuclidiana(J, B, D2),
+                                    D1 > D2.
+
+%Dica do Claude, estive tendo problemas de voltas muito longas, a LLM sugeriu ao invés de imaginar um círculo eu imaginar um
+%semi-círculo, subtraindo de 2Pi.
+normaliza(D, D) :- D >= -pi, D =< pi.
+normaliza(D, D2) :- D > pi, D2 is D - 2*pi.
+normaliza(D, D2) :- D < -pi, D2 is D + 2*pi.
+
+evasao([X,Y], Angulo, [Mx,My], 1, 0, 1) :- A is atan2(X - Mx, Y - My) - Angulo, normaliza(A, A1), A1 > 0.
+evasao([X,Y], Angulo, [Mx,My], 1, 1, 0) :- A is atan2(X - Mx, Y - My) - Angulo, normaliza(A, A1), A1 < 0.
+
+direcao(AnguloJato, AnguloAlvo, 1, 0) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) > 0.1, A2 > 0.
+direcao(AnguloJato, AnguloAlvo, 0, 1) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) > 0.1, A2 < 0.
+direcao(AnguloJato, AnguloAlvo, 0, 0) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) =< 0.1.
+
+fugir([X, Y, ANGLE, _, _], MISSEIS, [FORWARD, 0, LEFT, RIGHT, 1, "Socorro!!!"]) :- missilMaisProximo([X, Y], MISSEIS, Missil), 
+                                                                distanciaEuclidiana([X, Y], Missil, D), D =< 8100,
+                                                                evasao([X,Y], ANGLE, Missil, FORWARD, LEFT, RIGHT).
+
+ataqueOportunidade([X, Y], [Ax, Ay], 1, AnguloJato, AnguloAlvo) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 250000,
+                        direcao(AnguloJato, AnguloAlvo, _, _) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) =< 0.1.
+
+ataqueOportunidade([X, Y], [Ax, Ay], 0) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D > 250000, 
+direcao(AnguloJato, AnguloAlvo, 0, 0) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) =< 0.1..
+
+freia([X, Y], [Ax, Ay], 1) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 4900.
+freia([X, Y], [Ax, Ay], 0) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D > 4900.
+
+%Limit Breaker é uma referência de um jogo que gosto, Final Fantasy VII
+batalha([X, Y, ANGLE, _, _], ADVERSARIOS, [1, REVERSE, LEFT, RIGHT, BOOM, "Limit Breaker"]) :- alvoMaisProximo([X, Y], ADVERSARIOS, [Ax, Ay]),
+                                                                                direcao(ANGLE, atan2(X - Ax, Y - Ay), LEFT, RIGHT),
+                                                                                freia([X, Y], [Ax, Ay], REVERSE),
+                                                                                ataqueOportunidade([X, Y], [Ax, Ay], BOOM).               
+%[FORWARD, REVERSE, LEFT, RIGHT, BOOM, MSG]
+obter_controles(INFORMACAO, ADVERSARIOS, _, CONTROLES) :-
+    INFORMACAO = [_, _, _, SCORE, _],
+    SCORE > 20,
+    batalha(INFORMACAO, ADVERSARIOS, CONTROLES).
+
+obter_controles(INFORMACAO, _, MISSEIS, CONTROLES) :-
+    INFORMACAO = [_, _, _, SCORE, _],
+    SCORE =< 20,
+    fugir(INFORMACAO, MISSEIS, CONTROLES).
+
 obter_controles(INFORMACAO, ADVERSARIOS, MISSEIS, CONTROLES) :-
-    INFORMACAO = [X, Y, ANGLE, SCORE, SPEED],
-    CONTROLES = [FORWARD, REVERSE, LEFT, RIGHT, BOOM, MSG],
-    random_between(0,1,AA),
-    troca(AA, BB),
-    random_between(0,1,CC),
-    FORWARD is AA,
-    REVERSE is 0,
-    LEFT is AA,
-    RIGHT is BB,
-    BOOM is CC,
-    MSG = "Regra padrao aplicada".
-    %opcao:
-    %term_string([ADVERSARIOS| [MISSEIS]], MSG).
+    INFORMACAO = [_, _, _, SCORE, _],
+    SCORE =< 20,
+    \+ fugir(INFORMACAO, MISSEIS, CONTROLES),
+    batalha(INFORMACAO, ADVERSARIOS, CONTROLES).
 
 % Para evitar erros, o jato para:
 obter_controles(_, _, _, [0,0,0,0,0,"nenhuma regra aplicada"]).
