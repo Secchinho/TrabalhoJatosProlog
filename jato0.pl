@@ -28,17 +28,13 @@ troca(1, 0).
 
 distanciaEuclidiana([X, Y], [X1, Y1], D) :- Dx is X - X1, Dy is Y - Y1, D is Dx * Dx + Dy * Dy.
 
-alvoMaisProximo(_, [A|[]], A).
+alvoMaisProximo(_, [A|[]], A) :- !.
 alvoMaisProximo(J, [A|R], A) :- alvoMaisProximo(J, R, B), distanciaEuclidiana(J, A, D1), distanciaEuclidiana(J, B, D2),
                                 D1 =< D2.
 alvoMaisProximo(J, [A|R], B) :- alvoMaisProximo(J, R, B), distanciaEuclidiana(J, A, D1), distanciaEuclidiana(J, B, D2),
                                 D1 > D2.
 
-missilMaisProximo(_, [M|[]], M).
-missilMaisProximo(J, [M|R], M) :- missilMaisProximo(J, R, B), distanciaEuclidiana(J, M, D1), distanciaEuclidiana(J, B, D2),
-                                    D1 =< D2.
-missilMaisProximo(J, [M|R], B) :- missilMaisProximo(J, R, B), distanciaEuclidiana(J, M, D1), distanciaEuclidiana(J, B, D2),
-                                    D1 > D2.
+missilMaisProximo(J, L, M) :- alvoMaisProximo(J, L, M).
 
 %Dica do Claude, estive tendo problemas de voltas muito longas, a LLM sugeriu ao invés de imaginar um círculo eu imaginar um
 %semi-círculo, subtraindo de 2Pi.
@@ -46,8 +42,9 @@ normaliza(D, D) :- D >= -pi, D =< pi.
 normaliza(D, D2) :- D > pi, D2 is D - 2*pi.
 normaliza(D, D2) :- D < -pi, D2 is D + 2*pi.
 
+%o predicado atan2 também foi dica do Claude, para que eu calcule o arcotangente, conseguindo o angulo de onde está o alvo.
 evasao([X,Y], Angulo, [Mx,My], 1, 0, 1) :- A is atan2(X - Mx, Y - My) - Angulo, normaliza(A, A1), A1 > 0.
-evasao([X,Y], Angulo, [Mx,My], 1, 1, 0) :- A is atan2(X - Mx, Y - My) - Angulo, normaliza(A, A1), A1 < 0.
+evasao([X,Y], Angulo, [Mx,My], 1, 1, 0) :- A is atan2(X - Mx, Y - My) - Angulo, normaliza(A, A1), A1 =< 0.
 
 direcao(AnguloJato, AnguloAlvo, 1, 0) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) > 0.1, A2 > 0.
 direcao(AnguloJato, AnguloAlvo, 0, 1) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) > 0.1, A2 < 0.
@@ -57,34 +54,34 @@ fugir([X, Y, ANGLE, _, _], MISSEIS, [FORWARD, 0, LEFT, RIGHT, 1, "Socorro!!!"]) 
                                                                 distanciaEuclidiana([X, Y], Missil, D), D =< 8100,
                                                                 evasao([X,Y], ANGLE, Missil, FORWARD, LEFT, RIGHT).
 
-ataqueOportunidade([X, Y], [Ax, Ay], 1, AnguloJato, AnguloAlvo) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 250000,
-                        direcao(AnguloJato, AnguloAlvo, _, _) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) =< 0.1.
+ataqueOportunidade([X, Y], [Ax, Ay], 1, AnguloJato) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 360000,
+                                                                A is atan2(X - Ax, Y - Ay) - AnguloJato, normaliza(A, A2), abs(A2) =< 0.5, !.
 
-ataqueOportunidade([X, Y], [Ax, Ay], 0) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D > 250000, 
-direcao(AnguloJato, AnguloAlvo, 0, 0) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) =< 0.1..
+ataqueOportunidade(_, _, 0, _).
 
-freia([X, Y], [Ax, Ay], 1) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 4900.
-freia([X, Y], [Ax, Ay], 0) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D > 4900.
+freia([X, Y], [Ax, Ay], 1) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 3600.
+freia([X, Y], [Ax, Ay], 0) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D > 3600.
 
-%Limit Breaker é uma referência de um jogo que gosto, Final Fantasy VII
-batalha([X, Y, ANGLE, _, _], ADVERSARIOS, [1, REVERSE, LEFT, RIGHT, BOOM, "Limit Breaker"]) :- alvoMaisProximo([X, Y], ADVERSARIOS, [Ax, Ay]),
+%Berserker é uma referência a armadura berserker, do mangá Berserk
+batalha([X, Y, ANGLE, _, _], ADVERSARIOS, [FORWARD, REVERSE, LEFT, RIGHT, BOOM, "Berserker"]) :- alvoMaisProximo([X, Y], ADVERSARIOS, [Ax, Ay]),
                                                                                 direcao(ANGLE, atan2(X - Ax, Y - Ay), LEFT, RIGHT),
                                                                                 freia([X, Y], [Ax, Ay], REVERSE),
-                                                                                ataqueOportunidade([X, Y], [Ax, Ay], BOOM).               
+                                                                                troca(REVERSE, FORWARD),
+                                                                                ataqueOportunidade([X, Y], [Ax, Ay], BOOM, ANGLE).
 %[FORWARD, REVERSE, LEFT, RIGHT, BOOM, MSG]
 obter_controles(INFORMACAO, ADVERSARIOS, _, CONTROLES) :-
     INFORMACAO = [_, _, _, SCORE, _],
-    SCORE > 20,
+    SCORE > 50,
     batalha(INFORMACAO, ADVERSARIOS, CONTROLES).
 
 obter_controles(INFORMACAO, _, MISSEIS, CONTROLES) :-
     INFORMACAO = [_, _, _, SCORE, _],
-    SCORE =< 20,
+    SCORE =< 50,
     fugir(INFORMACAO, MISSEIS, CONTROLES).
 
 obter_controles(INFORMACAO, ADVERSARIOS, MISSEIS, CONTROLES) :-
     INFORMACAO = [_, _, _, SCORE, _],
-    SCORE =< 20,
+    SCORE =< 50,
     \+ fugir(INFORMACAO, MISSEIS, CONTROLES),
     batalha(INFORMACAO, ADVERSARIOS, CONTROLES).
 
