@@ -51,7 +51,7 @@ direcao(AnguloJato, AnguloAlvo, 0, 1) :- A is AnguloAlvo - AnguloJato, normaliza
 direcao(AnguloJato, AnguloAlvo, 0, 0) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) =< 0.1.
 
 fugir([X, Y, ANGLE, _, _], MISSEIS, [FORWARD, 0, LEFT, RIGHT, 0, "Socorro!!!"]) :- missilMaisProximo([X, Y], MISSEIS, Missil),
-                                                                distanciaEuclidiana([X, Y], Missil, D), D =< 4900,
+                                                                distanciaEuclidiana([X, Y], Missil, D), D =< 6400,
                                                                 evasao([X,Y], ANGLE, Missil, FORWARD, LEFT, RIGHT).
 
 ataqueOportunidade([X, Y], [Ax, Ay], 1, AnguloJato) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 360000,
