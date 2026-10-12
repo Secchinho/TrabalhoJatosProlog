@@ -50,13 +50,12 @@ direcao(AnguloJato, AnguloAlvo, 1, 0) :- A is AnguloAlvo - AnguloJato, normaliza
 direcao(AnguloJato, AnguloAlvo, 0, 1) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) > 0.1, A2 < 0.
 direcao(AnguloJato, AnguloAlvo, 0, 0) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) =< 0.1.
 
-fugir([X, Y, ANGLE, _, _], MISSEIS, [FORWARD, 0, LEFT, RIGHT, 1, "Socorro!!!"]) :- missilMaisProximo([X, Y], MISSEIS, Missil), 
-                                                                distanciaEuclidiana([X, Y], Missil, D), D =< 8100,
+fugir([X, Y, ANGLE, _, _], MISSEIS, [FORWARD, 0, LEFT, RIGHT, 0, "Socorro!!!"]) :- missilMaisProximo([X, Y], MISSEIS, Missil),
+                                                                distanciaEuclidiana([X, Y], Missil, D), D =< 4900,
                                                                 evasao([X,Y], ANGLE, Missil, FORWARD, LEFT, RIGHT).
 
 ataqueOportunidade([X, Y], [Ax, Ay], 1, AnguloJato) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 360000,
                                                                 A is atan2(X - Ax, Y - Ay) - AnguloJato, normaliza(A, A2), abs(A2) =< 0.5, !.
-
 ataqueOportunidade(_, _, 0, _).
 
 freia([X, Y], [Ax, Ay], 1) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 3600.
@@ -71,17 +70,17 @@ batalha([X, Y, ANGLE, _, _], ADVERSARIOS, [FORWARD, REVERSE, LEFT, RIGHT, BOOM, 
 %[FORWARD, REVERSE, LEFT, RIGHT, BOOM, MSG]
 obter_controles(INFORMACAO, ADVERSARIOS, _, CONTROLES) :-
     INFORMACAO = [_, _, _, SCORE, _],
-    SCORE > 50,
+    SCORE > 30,
     batalha(INFORMACAO, ADVERSARIOS, CONTROLES).
 
 obter_controles(INFORMACAO, _, MISSEIS, CONTROLES) :-
     INFORMACAO = [_, _, _, SCORE, _],
-    SCORE =< 50,
+    SCORE =< 30,
     fugir(INFORMACAO, MISSEIS, CONTROLES).
 
 obter_controles(INFORMACAO, ADVERSARIOS, MISSEIS, CONTROLES) :-
     INFORMACAO = [_, _, _, SCORE, _],
-    SCORE =< 50,
+    SCORE =< 30,
     \+ fugir(INFORMACAO, MISSEIS, CONTROLES),
     batalha(INFORMACAO, ADVERSARIOS, CONTROLES).
 
