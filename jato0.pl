@@ -28,7 +28,7 @@ troca(1, 0).
 
 distanciaEuclidiana([X, Y], [X1, Y1], D) :- Dx is X - X1, Dy is Y - Y1, D is Dx * Dx + Dy * Dy.
 
-alvoMaisProximo(_, [A|[]], A) :- !.
+alvoMaisProximo(_, [A|[]], A).
 alvoMaisProximo(J, [A|R], A) :- alvoMaisProximo(J, R, B), distanciaEuclidiana(J, A, D1), distanciaEuclidiana(J, B, D2),
                                 D1 =< D2.
 alvoMaisProximo(J, [A|R], B) :- alvoMaisProximo(J, R, B), distanciaEuclidiana(J, A, D1), distanciaEuclidiana(J, B, D2),
@@ -54,7 +54,7 @@ fugir([X, Y, ANGLE, _, _], MISSEIS, [FORWARD, 0, LEFT, RIGHT, 0, "Socorro!!!"]) 
                                                                 evasao([X,Y], ANGLE, Missil, FORWARD, LEFT, RIGHT).
 
 ataqueOportunidade([X, Y], [Ax, Ay], 1, AnguloJato) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 360000,
-                                                                A is atan2(X - Ax, Y - Ay) - AnguloJato, normaliza(A, A2), abs(A2) =< 0.5, !.
+                                                                A is atan2(X - Ax, Y - Ay) - AnguloJato, normaliza(A, A2), A2 =< 0.5, A2 >= -0.5, !.
 ataqueOportunidade(_, _, 0, _).
 
 freia([X, Y], [Ax, Ay], 1) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 3600.
