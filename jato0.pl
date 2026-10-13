@@ -39,14 +39,15 @@ missilMaisProximo(J, L, M) :- alvoMaisProximo(J, L, M).
 %Dica do Claude, estive tendo problemas de voltas muito longas.
 normaliza(D, D) :- D >= -pi, D =< pi.
 normaliza(D, D2) :- D > pi, D2 is D - 2*pi.
+normaliza(D, D2) :- D < -pi, D2 is D + 2*pi.
 
 %o predicado atan2 também foi dica do Claude, para que eu calcule o arcotangente, conseguindo o angulo de onde está o alvo.
 evasao([X,Y], Angulo, [Mx,My], 1, 0, 1) :- A is atan2(X - Mx, Y - My) - Angulo, normaliza(A, A1), A1 > 0.
 evasao([X,Y], Angulo, [Mx,My], 1, 1, 0) :- A is atan2(X - Mx, Y - My) - Angulo, normaliza(A, A1), A1 =< 0.
 
-direcao(AnguloJato, AnguloAlvo, 1, 0) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) > 0.1, A2 > 0.
-direcao(AnguloJato, AnguloAlvo, 0, 1) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) > 0.1, A2 < 0.
-direcao(AnguloJato, AnguloAlvo, 0, 0) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), abs(A2) =< 0.1.
+direcao(AnguloJato, AnguloAlvo, 1, 0) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), A2 > 0.1.
+direcao(AnguloJato, AnguloAlvo, 0, 1) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), A2 < -0.1.
+direcao(AnguloJato, AnguloAlvo, 0, 0) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), A2 >= -0.1, A2 =< 0.1.
 
 fugir([X, Y, ANGLE, _, _], MISSEIS, [FORWARD, 0, LEFT, RIGHT, 0, "Socorro!!!"]) :- missilMaisProximo([X, Y], MISSEIS, Missil),
                                                                 distanciaEuclidiana([X, Y], Missil, D), D =< 6400,
