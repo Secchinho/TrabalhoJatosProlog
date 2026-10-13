@@ -1,6 +1,6 @@
 
 //////////// MODIFIQUE AQUI:
-const dummyJets=20; // quantidade de jatos aleatórios
+const dummyJets=10; // quantidade de jatos aleatórios
 const keysJet=false; // modifique para ter um jato controlado pelo teclado
 const prologJets=[]; // jatos prolog
 

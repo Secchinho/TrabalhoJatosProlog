@@ -54,7 +54,7 @@ fugir([X, Y, ANGLE, _, _], MISSEIS, [FORWARD, 0, LEFT, RIGHT, 0, "Socorro!!!"]) 
                                                                 evasao([X,Y], ANGLE, Missil, FORWARD, LEFT, RIGHT).
 
 ataqueOportunidade([X, Y], [Ax, Ay], 1, AnguloJato) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 360000,
-                                                                A is atan2(X - Ax, Y - Ay) - AnguloJato, normaliza(A, A2), A2 =< 0.5, A2 >= -0.5, !.
+                                                                A is atan2(X - Ax, Y - Ay) - AnguloJato, normaliza(A, A2), A2 =< 0.1, A2 >= -0.5, !.
 ataqueOportunidade(_, _, 0, _).
 
 freia([X, Y], [Ax, Ay], 1) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 3600.
