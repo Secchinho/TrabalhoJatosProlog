@@ -54,16 +54,16 @@ fugir([X, Y, ANGLE, _, _], MISSEIS, [FORWARD, 0, LEFT, RIGHT, 0, "Socorro!!!"]) 
                                                                 evasao([X,Y], ANGLE, Missil, FORWARD, LEFT, RIGHT).
 
 ataqueOportunidade([X, Y], [Ax, Ay], 1, AnguloJato) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 360000,
-                                                                A is atan2(X - Ax, Y - Ay) - AnguloJato, normaliza(A, A2), A2 =< 0.1, A2 >= -0.5, !.
+                                                                A is atan2(X - Ax, Y - Ay) - AnguloJato, normaliza(A, A2), A2 =< 0.5, A2 >= -0.5, !.
 ataqueOportunidade(_, _, 0, _).
 
-freia([X, Y], [Ax, Ay], 1) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 3600.
-freia([X, Y], [Ax, Ay], 0) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D > 3600.
+freia([X, Y], [Ax, Ay], 1, AnguloJato) :- distanciaEuclidiana([X, Y], [Ax, Ay], D), D =< 3600, A is atan2(X - Ax, Y - Ay) - AnguloJato, normaliza(A, A2), A2 =< 0.5, A2 >= -0.5.
+freia(_, _, 0, _).
 
 %Berserker é uma referência a armadura berserker, do mangá Berserk
 batalha([X, Y, ANGLE, _, _], ADVERSARIOS, [FORWARD, REVERSE, LEFT, RIGHT, BOOM, "Berserker"]) :- alvoMaisProximo([X, Y], ADVERSARIOS, [Ax, Ay]),
                                                                                 direcao(ANGLE, atan2(X - Ax, Y - Ay), LEFT, RIGHT),
-                                                                                freia([X, Y], [Ax, Ay], REVERSE),
+                                                                                freia([X, Y], [Ax, Ay], REVERSE, ANGLE),
                                                                                 troca(REVERSE, FORWARD),
                                                                                 ataqueOportunidade([X, Y], [Ax, Ay], BOOM, ANGLE).
 %[FORWARD, REVERSE, LEFT, RIGHT, BOOM, MSG]
