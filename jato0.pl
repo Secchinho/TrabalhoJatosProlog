@@ -39,7 +39,6 @@ missilMaisProximo(J, L, M) :- alvoMaisProximo(J, L, M).
 %Dica do Claude, estive tendo problemas de voltas muito longas.
 normaliza(D, D) :- D >= -pi, D =< pi.
 normaliza(D, D2) :- D > pi, D2 is D - 2*pi.
-normaliza(D, D2) :- D < -pi, D2 is D + 2*pi.
 
 %o predicado atan2 também foi dica do Claude, para que eu calcule o arcotangente, conseguindo o angulo de onde está o alvo.
 evasao([X,Y], Angulo, [Mx,My], 1, 0, 1) :- A is atan2(X - Mx, Y - My) - Angulo, normaliza(A, A1), A1 > 0.
