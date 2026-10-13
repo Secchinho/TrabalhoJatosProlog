@@ -36,8 +36,7 @@ alvoMaisProximo(J, [A|R], B) :- alvoMaisProximo(J, R, B), distanciaEuclidiana(J,
 
 missilMaisProximo(J, L, M) :- alvoMaisProximo(J, L, M).
 
-%Dica do Claude, estive tendo problemas de voltas muito longas, a LLM sugeriu ao invés de imaginar um círculo eu imaginar um
-%semi-círculo, subtraindo de 2Pi.
+%Dica do Claude, estive tendo problemas de voltas muito longas.
 normaliza(D, D) :- D >= -pi, D =< pi.
 normaliza(D, D2) :- D > pi, D2 is D - 2*pi.
 normaliza(D, D2) :- D < -pi, D2 is D + 2*pi.
