@@ -29,10 +29,6 @@ altura(768).
 troca(0, 1).
 troca(1, 0).
 
-distanciaEuclidiana([X, Y], [X1, Y1], D) :- Dx is X - X1, Dy is Y - Y1, D is Dx * Dx + Dy * Dy.
-
-% Adaptando distancia euclidiana para o cenario toroidal
-
 % Delta maior que a metade -> subtrai a dimensão
 ajusta_delta(Delta, Dimensao, DeltaAjustado) :-
     Metade is Dimensao / 2,
@@ -60,7 +56,7 @@ distanciaToroidal([X, Y], [X1, Y1], D) :-
     Dy is Y - Y1,
     ajusta_delta(Dx, L, Dx1),
     ajusta_delta(Dy, H, Dy1),
-    D is Dx1 * Dx1 + Dy1 * Dy1.
+    D is sqrt(Dx1 * Dx1 + Dy1 * Dy1).
 
 anguloToroidal([X, Y], [X1, Y1], Angulo) :-
     largura(L),
@@ -93,15 +89,15 @@ direcao(AnguloJato, AnguloAlvo, 0, 1) :- A is AnguloAlvo - AnguloJato, normaliza
 direcao(AnguloJato, AnguloAlvo, 0, 0) :- A is AnguloAlvo - AnguloJato, normaliza(A, A2), A2 >= -0.1, A2 =< 0.1.
 
 fugir([X, Y, ANGLE, _, _], MISSEIS, [FORWARD, 0, LEFT, RIGHT, 0, "Socorro!!!"]) :- missilMaisProximo([X, Y], MISSEIS, Missil),
-                                                                distanciaToroidal([X, Y], Missil, D), D =< 8100,
+                                                                distanciaToroidal([X, Y], Missil, D), D =< 90,
                                                                 evasao([X,Y], ANGLE, Missil, FORWARD, LEFT, RIGHT).
 
-ataqueOportunidade([X, Y], [Ax, Ay], 1, AnguloJato) :- distanciaToroidal([X, Y], [Ax, Ay], D), D =< 360000,
+ataqueOportunidade([X, Y], [Ax, Ay], 1, AnguloJato) :- distanciaToroidal([X, Y], [Ax, Ay], D), D =< 600,
                                         anguloToroidal([X, Y], [Ax, Ay], AnguloAlvo), A is AnguloAlvo - AnguloJato,
                                         normaliza(A, A2), A2 =< 0.5, A2 >= -0.5, !.
 ataqueOportunidade(_, _, 0, _).
 
-freia([X, Y], [Ax, Ay], 1, AnguloJato) :- distanciaToroidal([X, Y], [Ax, Ay], D), D =< 3600, anguloToroidal([X, Y], [Ax, Ay], AnguloAlvo), A is AnguloAlvo - AnguloJato, normaliza(A, A2), A2 =< 0.5, A2 >= -0.5.
+freia([X, Y], [Ax, Ay], 1, AnguloJato) :- distanciaToroidal([X, Y], [Ax, Ay], D), D =< 60, anguloToroidal([X, Y], [Ax, Ay], AnguloAlvo), A is AnguloAlvo - AnguloJato, normaliza(A, A2), A2 =< 0.5, A2 >= -0.5.
 freia(_, _, 0, _).
 
 %Berserker é uma referência a armadura berserker, do mangá Berserk

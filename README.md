@@ -1,3 +1,11 @@
+# Este repositório trata da implementação do trabalho proposto na disciplina de Inteligência Artificial da UFES - campus Alegre
+## Membros do grupo: Fabrício Lopes Lima do Amaral e Raphael Figueiredo Secchin
+### Curso: Ciência da Computação
+
+### Segue abaixo o enunciado do trabalho
+
+---
+
 # Batalha de Jatos com Radar
 
 Trabalho desenvolvido para a disciplina de Inteligência Artificial da UFES, campus Alegre.
